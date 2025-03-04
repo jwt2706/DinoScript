@@ -1,13 +1,18 @@
-import sys, os, re
+import math, sys, os, re
 
 TOKEN_TYPES = {
-    "NUMBER": r"\d+",
     "VAR": r"varasaurus",
     "EQUALS": r"=",
     "PLUS": r"triceraplus",
     "MINUS": r"velociminus",
     "MULTIPLY": r"stegomult",
     "DIVIDE": r"tyrannidiv",
+    "EXPONENT": r"pterodactexp",
+    "MODULUS": r"ankylomod",
+    "SQRT": r"brontosqrt",
+    "LOG": r"dilog",
+    "PRINT": r"PRINT",
+    "NUMBER": r"\d+",
     "IDENTIFIER": r"[a-zA-Z_][a-zA-Z0-9_]*",
     "WHITESPACE": r"\s+",
 }
@@ -23,7 +28,7 @@ def lexer(code):
             regex = re.compile(pattern)
             match = regex.match(code)
             if match:
-                if token_type != "WHITESPACE":
+                if token_type != "WHITESPACE" and token_type != "PRINT":
                     tokens.append((token_type, match.group(0)))
                 code = code[match.end():]
                 break
@@ -40,9 +45,13 @@ def eval_exp(tokens):
         return int(tokens[0][1])
     
     expression = ""
+    requires_end_par = False
     for token_type, value in tokens:
         if token_type == "NUMBER":
             expression += value
+            if requires_end_par:
+                expression += ")"
+                requires_end_par = False
         elif token_type == "IDENTIFIER":
             if value in variables:
                 expression += str(variables[value])
@@ -56,6 +65,16 @@ def eval_exp(tokens):
             expression += "*"
         elif token_type == "DIVIDE":
             expression += "/"
+        elif token_type == "EXPONENT":
+            expression += "**"
+        elif token_type == "MODULUS":
+            expression += "%"
+        elif token_type == "SQRT":
+            expression += "math.sqrt("
+            requires_end_par = True
+        elif token_type == "LOG":
+            expression += "math.log("
+            requires_end_par = True
     
     # compute the expression and return
     return eval(expression)
@@ -80,9 +99,11 @@ if len(sys.argv) > 1:
             for line in f:
                 line = line.strip()
                 if line:
-                    result = interpret(line)
-                    if result is not None:
+                    if line.startswith("PRINT"):
+                        result = interpret(line[6:].strip())
                         print(result)
+                    else:
+                        interpret(line)
     else:
         print(f"File '{sys.argv[1]}' is unreadable.")
 else:
