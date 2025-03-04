@@ -9,3 +9,6 @@ Supported Key Words:
 - MINUS: velociminus
 - MULTIPLY: stegomult
 - DIVIDE: tyrannidiv
+
+RELP Interactive Shell
+Support for `.dino` files

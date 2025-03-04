@@ -1,4 +1,4 @@
-import re
+import sys, os, re
 
 TOKEN_TYPES = {
     "NUMBER": r"\d+",
@@ -73,14 +73,27 @@ def interpret(code):
 
     return eval_exp(tokens)
 
-print("DinoPy is running.")
-while True:
-    user_input = input("🦖 >>> ")
-    if user_input == "exit":
-        break
-    try:
-        result = interpret(user_input)
-        if result is not None:
-            print(result)
-    except Exception as e:
-        print("Error:", e)
+# check if we have an arg passed, if so, check if its a .dino file that is called
+if len(sys.argv) > 1:
+    if os.path.isfile(sys.argv[1]) and sys.argv[1].endswith(".dino"):
+        with open(sys.argv[1], "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    result = interpret(line)
+                    if result is not None:
+                        print(result)
+    else:
+        print(f"File '{sys.argv[1]}' is unreadable.")
+else:
+    print("DinoScript Shell is running.")
+    while True:
+        user_input = input("🦖 >>> ")
+        if user_input == "exit":
+            break
+        try:
+            result = interpret(user_input)
+            if result is not None:
+                print(result)
+        except Exception as e:
+            print("Error:", e)
